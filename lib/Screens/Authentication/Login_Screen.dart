@@ -1,7 +1,10 @@
+import 'package:e_commerce/Screens/AdminDashboardScreen/AdminDashboardScreen.dart';
 import 'package:e_commerce/Screens/Authentication/Sign_Up_screen.dart';
 import 'package:e_commerce/Screens/Homescreen/homescreen.dart';
 import 'package:e_commerce/Services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -12,43 +15,60 @@ class LoginScreen extends StatelessWidget {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
     void _handleLogin() async {
-      final email = emailController.text.trim();
-      final password = passwordController.text.trim();
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
 
-      final user = await authService.login(email, password);
-      if (user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 5),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          content: Text(
-            "Login successful!",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        ));
-        await Future.delayed(Duration(seconds: 2));
-        // Login success
+  final user = await authService.login(email, password);
+  if (user != null) {
+    // Fetch user data from Firestore
+    final uid = user.uid;
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+    if (userDoc.exists) {
+      final role = userDoc['role']; // 👈 Fetch the 'role'
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        content: Text(
+          "Login successful!",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ));
+
+      await Future.delayed(Duration(seconds: 1));
+
+      // Navigate based on role
+      if (role == 'admin') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Admindashboardscreen()),
+        );
+      } else {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => Homescreen()),
         );
-      } else {
-        // Login failed
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              backgroundColor: Colors.redAccent,
-              duration: Duration(seconds: 2),
-              content: Text("Invalid email or password. Please try again.")),
-        );
       }
+    } else {
+      print("User data not found.");
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        backgroundColor: Colors.redAccent,
+        duration: Duration(seconds: 2),
+        content: Text("Invalid email or password. Please try again."),
+      ),
+    );
+  }
+}
 
     return Scaffold(
       body: Container(
