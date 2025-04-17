@@ -1,5 +1,6 @@
 import 'package:e_commerce/Screens/Authentication/Login_Screen.dart';
 import 'package:e_commerce/Screens/Authentication/Sign_Up_screen.dart';
+import 'package:e_commerce/Screens/Homescreen/homescreen.dart';
 import 'package:e_commerce/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
-        home: SignUpScreen());
+        home: Homescreen());
   }
 }

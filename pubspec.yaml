@@ -39,6 +39,7 @@ dependencies:
   firebase_auth: ^5.5.2
   flutter_bloc: ^9.1.0
   cloud_firestore: ^5.6.6
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -63,7 +64,12 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/images/footwear.png
+    - assets/images/apparel.png
+    - assets/images/equipment.jpg
+    - assets/images/fitness.png
+  
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

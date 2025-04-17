@@ -175,12 +175,6 @@ class SignUpScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                           borderSide: BorderSide.none,
                         ),
-                        // suffixIcon: IconButton(
-                        //   icon: Icon(Icons.visibility_off),
-                        //   onPressed: () {
-                        //     // Handle password visibility toggle
-                        //   },
-                        // ),
                       ),
                     ),
                   ),
@@ -212,12 +206,6 @@ class SignUpScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                           borderSide: BorderSide.none,
                         ),
-                        // suffixIcon: IconButton(
-                        //   icon: Icon(Icons.visibility_off),
-                        //   onPressed: () {
-                        //     // Handle password visibility toggle
-                        //   },
-                        // ),
                       ),
                     ),
                   ),

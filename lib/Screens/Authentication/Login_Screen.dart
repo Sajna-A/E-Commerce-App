@@ -1,32 +1,35 @@
-import 'package:e_commerce/Screens/AdminDashboardScreen/AdminDashboardScreen.dart';
 import 'package:e_commerce/Screens/Authentication/Sign_Up_screen.dart';
 import 'package:e_commerce/Screens/Homescreen/homescreen.dart';
 import 'package:e_commerce/Services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final AuthService authService = AuthService();
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-    void _handleLogin() async {
-  final email = emailController.text.trim();
-  final password = passwordController.text.trim();
+  State<LoginScreen> createState() => _LoginScreenState();
+}
 
-  final user = await authService.login(email, password);
-  if (user != null) {
-    // Fetch user data from Firestore
-    final uid = user.uid;
-    final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+class _LoginScreenState extends State<LoginScreen> {
+  final AuthService authService = AuthService();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool _isPasswordVisible = false;
 
-    if (userDoc.exists) {
-      final role = userDoc['role']; // 👈 Fetch the 'role'
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
+  void _handleLogin() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    final user = await authService.login(email, password);
+    if (user != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.green,
         duration: Duration(seconds: 3),
@@ -41,35 +44,27 @@ class LoginScreen extends StatelessWidget {
 
       await Future.delayed(Duration(seconds: 1));
 
-      // Navigate based on role
-      if (role == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Admindashboardscreen()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Homescreen()),
-        );
-      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Homescreen()),
+      );
     } else {
-      print("User data not found.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: Colors.redAccent,
+          duration: Duration(seconds: 2),
+          content: Text("Invalid email or password. Please try again."),
+        ),
+      );
     }
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.redAccent,
-        duration: Duration(seconds: 2),
-        content: Text("Invalid email or password. Please try again."),
-      ),
-    );
   }
-}
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -91,7 +86,6 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🔝 Welcome Text at the top
                 Text(
                   "Welcome \nBack",
                   style: TextStyle(
@@ -100,8 +94,7 @@ class LoginScreen extends StatelessWidget {
                     color: Color(0xff5d3675),
                   ),
                 ),
-                SizedBox(height: 150), // spacing before form
-                // 📧 Email Field
+                SizedBox(height: 150),
                 Center(
                   child: Container(
                     width: 350,
@@ -130,7 +123,6 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // 🔒 Password Field
                 Center(
                   child: Container(
                     width: 350,
@@ -146,7 +138,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                     child: TextFormField(
                       controller: passwordController,
-                      obscureText: true,
+                      obscureText: !_isPasswordVisible,
                       decoration: InputDecoration(
                         hintText: "Password",
                         fillColor: Colors.white,
@@ -156,9 +148,15 @@ class LoginScreen extends StatelessWidget {
                           borderSide: BorderSide.none,
                         ),
                         suffixIcon: IconButton(
-                          icon: Icon(Icons.visibility_off),
+                          icon: Icon(
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
                           onPressed: () {
-                            // Handle password visibility toggle
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
                           },
                         ),
                       ),
@@ -166,16 +164,12 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
-                // 🔘 Login Button
                 Center(
                   child: SizedBox(
                     width: 200,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
-                        _handleLogin();
-                        // Handle login button press
-                      },
+                      onPressed: _handleLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff5d3675),
                         foregroundColor: Colors.white,
@@ -206,17 +200,20 @@ class LoginScreen extends StatelessWidget {
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SignUpScreen(),
-                            ));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SignUpScreen(),
+                          ),
+                        );
                       },
-                      child: Text("Sign Up",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Color(0xff5d3675),
-                          )),
+                      child: Text(
+                        "Sign Up",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Color(0xff5d3675),
+                        ),
+                      ),
                     ),
                   ],
                 ),
